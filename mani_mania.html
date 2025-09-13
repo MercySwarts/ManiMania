@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nail It! Creative Studio</title>
+    <!-- Use Tailwind CSS for clean, modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fcebeb; /* A soft, very light pink background */
+        }
+        .canvas-container {
+            position: relative;
+            background: #fff;
+            border-radius: 1.5rem; /* rounded-3xl */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-xl */
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        /* Custom scrollbar for controls */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #fdf2f2;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #fbc4c4;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #f59191;
+        }
+        /* Style for the "achievements" and "likes" message box */
+        #message-box {
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+        }
+        .hidden {
+            opacity: 0;
+            transform: translateY(20px);
+            pointer-events: none;
+        }
+        .visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .confirm-dialog {
+            transition: opacity 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 flex flex-col items-center justify-center min-h-screen text-slate-800">
+    <div class="w-full max-w-7xl flex flex-col md:flex-row gap-8">
+        <!-- Controls Panel -->
+        <div class="w-full md:w-1/3 bg-white p-6 md:p-8 rounded-2xl shadow-xl flex flex-col gap-6 custom-scrollbar overflow-y-auto max-h-[calc(100vh-64px)]">
+            <h1 class="text-3xl font-extrabold text-slate-900 text-center">Nail It! Studio</h1>
+            
+            <!-- Polish Color Selector -->
+            <div class="bg-pink-50 p-4 rounded-xl border border-pink-200">
+                <h2 class="text-xl font-bold mb-3">Polish Color</h2>
+                <input type="color" id="polish-color" value="#ff69b4" class="w-full h-12 rounded-lg border-2 border-pink-300 cursor-pointer">
+            </div>
+
+            <!-- Nail Shape Selector Menu -->
+            <div class="bg-pink-50 p-4 rounded-xl border border-pink-200">
+                <h2 class="text-xl font-bold mb-3">Nail Shape</h2>
+                <div class="flex flex-wrap gap-2">
+                    <button class="shape-btn flex-grow py-2 px-4 rounded-lg bg-white border border-pink-300 text-sm font-semibold hover:bg-pink-100 transition-colors" data-shape="almond">Almond</button>
+                    <button class="shape-btn flex-grow py-2 px-4 rounded-lg bg-white border border-pink-300 text-sm font-semibold hover:bg-pink-100 transition-colors" data-shape="square">Square</button>
+                    <button class="shape-btn flex-grow py-2 px-4 rounded-lg bg-white border border-pink-300 text-sm font-semibold hover:bg-pink-100 transition-colors" data-shape="coffin">Coffin</button>
+                    <button class="shape-btn flex-grow py-2 px-4 rounded-lg bg-white border border-pink-300 text-sm font-semibold hover:bg-pink-100 transition-colors" data-shape="stiletto">Stiletto</button>
+                    <button class="shape-btn flex-grow py-2 px-4 rounded-lg bg-white border border-pink-300 text-sm font-semibold hover:bg-pink-100 transition-colors" data-shape="oval">Oval</button>
+                </div>
+            </div>
+
+            <!-- Patterns Selector Menu -->
+            <div class="bg-pink-50 p-4 rounded-xl border border-pink-200">
+                <h2 class="text-xl font-bold mb-3">Patterns</h2>
+                <div class="flex flex-col gap-4">
+                    <!-- Animal Print -->
+                    <div>
+                        <h3 class="font-semibold text-sm mb-2 text-slate-600">Animal Print</h3>
+                        <div class="flex flex-wrap gap-2">
+                            <button class="pattern-btn py-2 px-4 rounded-lg bg-white border border-pink-300 text-sm font-semibold hover:bg-pink-100 transition-colors" data-pattern="none">None</button>
+                            <button class="pattern-btn py-2 px-4 rounded-lg bg-white border border-pink-300 text-sm font-semibold hover:bg-pink-100 transition-colors" data-pattern="leopard">Leopard</button>
+                            <button class="pattern-btn py-2 px-4 rounded-lg bg-white border border-pink-300 text-sm font-semibold hover:bg-pink-100 transition-colors" data-pattern="zebra">Zebra</button>
+                            <button class="pattern-btn py-2 px-4 rounded-lg bg-white border border-pink-300 text-sm font-semibold hover:bg-pink-100 transition-colors" data-pattern="tiger">Tiger</button>
+                            <button class="pattern-btn py-2 px-4 rounded-lg bg-white border border-pink-300 text-sm font-semibold hover:bg-pink-100 transition-colors" data-pattern="cow">Cow</button>
+                        </div>
+                    </div>
+                    <!-- Geometric -->
+                    <div>
+                        <h3 class="font-semibold text-sm mb-2 text-slate-600">Geometric</h3>
+                        <div class="flex flex-wrap gap-2">
+                            <button class="pattern-btn py-2 px-4 rounded-lg bg-white border border-pink-300 text-sm font-semibold hover:bg-pink-100 transition-colors" data-pattern="stripes">Stripes</button>
+                            <button class="pattern-btn py-2 px-4 rounded-lg bg-white border border-pink-300 text-sm font-semibold hover:bg-pink-100 transition-colors" data-pattern="dots">Polka Dots</button>
+                            <button class="pattern-btn py-2 px-4 rounded-lg bg-white border border-pink-300 text-sm font-semibold hover:bg-pink-100 transition-colors" data-pattern="checkerboard">Checkerboard</button>
+                            <button class="pattern-btn py-2 px-4 rounded-lg bg-white border border-pink-300 text-sm font-semibold hover:bg-pink-100 transition-colors" data-pattern="honeycomb">Honeycomb</button>
+                        </div>
+                    </div>
+                    <!-- Nature & Floral -->
+                    <div>
+                        <h3 class="font-semibold text-sm mb-2 text-slate-600">Nature & Floral</h3>
+                        <div class="flex flex-wrap gap-2">
+                            <button class="pattern-btn py-2 px-4 rounded-lg bg-white border border-pink-300 text-sm font-semibold hover:bg-pink-100 transition-colors" data-pattern="leaves">Leaves</button>
+                            <button class="pattern-btn py-2 px-4 rounded-lg bg-white border border-pink-300 text-sm font-semibold hover:bg-pink-100 transition-colors" data-pattern="waves">Waves</button>
+                            <button class="pattern-btn py-2 px-4 rounded-lg bg-white border border-pink-300 text-sm font-semibold hover:bg-pink-100 transition-colors" data-pattern="clouds">Clouds</button>
+                        </div>
+                    </div>
+                    <!-- Food & Drink -->
+                    <div>
+                        <h3 class="font-semibold text-sm mb-2 text-slate-600">Food & Drink</h3>
+                        <div class="flex flex-wrap gap-2">
+                            <button class="pattern-btn py-2 px-4 rounded-lg bg-white border border-pink-300 text-sm font-semibold hover:bg-pink-100 transition-colors" data-pattern="fruit">Fruit</button>
+                            <button class="pattern-btn py-2 px-4 rounded-lg bg-white border border-pink-300 text-sm font-semibold hover:bg-pink-100 transition-colors" data-pattern="donut">Donut</button>
+                        </div>
+                    </div>
+                    <!-- Seasonal -->
+                    <div>
+                        <h3 class="font-semibold text-sm mb-2 text-slate-600">Seasonal</h3>
+                        <div class="flex flex-wrap gap-2">
+                            <button class="pattern-btn py-2 px-4 rounded-lg bg-white border border-pink-300 text-sm font-semibold hover:bg-pink-100 transition-colors" data-pattern="snowflake">Snowflake</button>
+                            <button class="pattern-btn py-2 px-4 rounded-lg bg-white border border-pink-300 text-sm font-semibold hover:bg-pink-100 transition-colors" data-pattern="pumpkin">Pumpkin</button>
+                        </div>
+                    </div>
+                    <!-- Abstract & Artistic -->
+                    <div>
+                        <h3 class="font-semibold text-sm mb-2 text-slate-600">Abstract & Artistic</h3>
+                        <div class="flex flex-wrap gap-2">
+                            <button class="pattern-btn py-2 px-4 rounded-lg bg-white border border-pink-300 text-sm font-semibold hover:bg-pink-100 transition-colors" data-pattern="tie-dye">Tie-Dye</button>
+                            <button class="pattern-btn py-2 px-4 rounded-lg bg-white border border-pink-300 text-sm font-semibold hover:bg-pink-100 transition-colors" data-pattern="marbling">Marbling</button>
+                            <button class="pattern-btn py-2 px-4 rounded-lg bg-white border border-pink-300 text-sm font-semibold hover:bg-pink-100 transition-colors" data-pattern="splatter">Splatter</button>
+                            <button class="pattern-btn py-2 px-4 rounded-lg bg-white border border-pink-300 text-sm font-semibold hover:bg-pink-100 transition-colors" data-pattern="galaxy">Galaxy</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Charm Selector Menu -->
+            <div class="bg-pink-50 p-4 rounded-xl border border-pink-200">
+                <h2 class="text-xl font-bold mb-3">Charms</h2>
+                <div class="flex flex-wrap gap-2">
+                    <button class="charm-btn flex-grow py-2 px-4 rounded-lg bg-white border border-pink-300 text-sm font-semibold hover:bg-pink-100 transition-colors" data-charm="none">None</button>
+                    <button class="charm-btn flex-grow py-2 px-4 rounded-lg bg-white border border-pink-300 text-sm font-semibold hover:bg-pink-100 transition-colors" data-charm="star">⭐ Star</button>
+                    <button class="charm-btn flex-grow py-2 px-4 rounded-lg bg-white border border-pink-300 text-sm font-semibold hover:bg-pink-100 transition-colors" data-charm="heart">❤️ Heart</button>
+                    <button class="charm-btn flex-grow py-2 px-4 rounded-lg bg-white border border-pink-300 text-sm font-semibold hover:bg-pink-100 transition-colors" data-charm="diamond">💎 Diamond</button>
+                    <button class="charm-btn flex-grow py-2 px-4 rounded-lg bg-white border border-pink-300 text-sm font-semibold hover:bg-pink-100 transition-colors" data-charm="moon">🌙 Moon</button>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="grid grid-cols-2 gap-4 mt-4">
+                <button id="save-btn" class="py-3 px-6 rounded-xl bg-orange-400 text-white font-bold hover:bg-orange-500 transition-colors shadow-lg">Save Design</button>
+                <button id="clear-btn" class="py-3 px-6 rounded-xl bg-red-400 text-white font-bold hover:bg-red-500 transition-colors shadow-lg">Clear All</button>
+                <button id="like-btn" class="py-3 px-6 rounded-xl bg-pink-400 text-white font-bold hover:bg-pink-500 transition-colors col-span-2 shadow-lg flex items-center justify-center gap-2">
+                    <span>👍</span>
+                    Like Design
+                </button>
+            </div>
+        </div>
+
+        <!-- Canvas and Saved Designs -->
+        <div class="w-full md:w-2/3 flex flex-col gap-8">
+            <!-- Main Canvas Area -->
+            <div class="canvas-container relative flex items-center justify-center p-4">
+                <canvas id="nailCanvas" class="w-full h-full"></canvas>
+                <!-- Message box for likes/achievements -->
+                <div id="message-box" class="absolute bottom-8 left-1/2 -translate-x-1/2 px-6 py-3 bg-white/90 text-slate-800 text-lg font-semibold rounded-full shadow-lg border border-gray-300 backdrop-blur-sm hidden">
+                    Design Saved!
+                </div>
+            </div>
+
+            <!-- Saved Designs -->
+            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-xl">
+                <h2 class="text-2xl font-bold mb-4">Your Saved Designs</h2>
+                <div id="saved-designs-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <p class="text-center text-slate-500 col-span-full" id="no-designs-message">No designs saved yet.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Confirmation Dialog -->
+    <div id="confirmation-dialog" class="confirm-dialog fixed inset-0 bg-gray-900 bg-opacity-70 flex items-center justify-center z-50 hidden">
+        <div class="bg-white p-8 rounded-xl shadow-2xl max-w-sm w-full text-center">
+            <p id="confirm-message" class="text-lg font-semibold mb-6">Are you sure?</p>
+            <div class="flex justify-around gap-4">
+                <button id="confirm-yes" class="py-2 px-6 rounded-lg bg-red-500 text-white font-bold hover:bg-red-600 transition-colors">Yes</button>
+                <button id="confirm-no" class="py-2 px-6 rounded-lg bg-gray-300 text-gray-800 font-bold hover:bg-gray-400 transition-colors">No</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // DOM elements
+        const canvas = document.getElementById('nailCanvas');
+        const ctx = canvas.getContext('2d');
+        const polishColorInput = document.getElementById('polish-color');
+        const shapeButtons = document.querySelectorAll('.shape-btn');
+        const patternButtons = document.querySelectorAll('.pattern-btn');
+        const charmButtons = document.querySelectorAll('.charm-btn');
+        const saveBtn = document.getElementById('save-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const likeBtn = document.getElementById('like-btn');
+        const savedDesignsContainer = document.getElementById('saved-designs-container');
+        const noDesignsMessage = document.getElementById('no-designs-message');
+        const messageBox = document.getElementById('message-box');
+
+        // Confirmation dialog elements
+        const confirmationDialog = document.getElementById('confirmation-dialog');
+        const confirmMessage = document.getElementById('confirm-message');
+        const confirmYesBtn = document.getElementById('confirm-yes');
+        const confirmNoBtn = document.getElementById('confirm-no');
+
+        // Initial canvas dimensions
+        let canvasWidth = 400;
+        let canvasHeight = 600;
+        let nailWidth = 150;
+        let nailHeight = 250;
+        
+        // Initial state of the nail design
+        let currentDesign = {
+            color: '#ff69b4',
+            shape: 'almond',
+            pattern: 'none',
+            charm: 'none'
+        };
+
+        // --- Core Drawing Logic ---
+
+        /**
+         * Draws the nail on the canvas based on the current design state.
+         * @param {string} shape - The shape of the nail.
+         * @param {string} color - The base color of the nail.
+         * @param {string} pattern - The pattern to apply.
+         * @param {string} charm - The charm to apply.
+         */
+        function drawNail(shape, color, pattern, charm) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+
+            ctx.save();
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            
+            // Draw the base nail shape
+            const shapes = {
+                almond: () => {
+                    ctx.moveTo(cx - nailWidth / 2, cy + nailHeight / 2);
+                    ctx.quadraticCurveTo(cx - nailWidth / 2, cy - nailHeight * 0.25, cx, cy - nailHeight / 2);
+                    ctx.quadraticCurveTo(cx + nailWidth / 2, cy - nailHeight * 0.25, cx + nailWidth / 2, cy + nailHeight / 2);
+                    ctx.closePath();
+                },
+                square: () => {
+                    ctx.moveTo(cx - nailWidth / 2, cy - nailHeight / 2 + 30);
+                    ctx.lineTo(cx - nailWidth / 2, cy + nailHeight / 2);
+                    ctx.lineTo(cx + nailWidth / 2, cy + nailHeight / 2);
+                    ctx.lineTo(cx + nailWidth / 2, cy - nailHeight / 2 + 30);
+                    ctx.quadraticCurveTo(cx, cy - nailHeight / 2 - 10, cx - nailWidth / 2, cy - nailHeight / 2 + 30);
+                    ctx.closePath();
+                },
+                coffin: () => {
+                    ctx.moveTo(cx - nailWidth * 0.25, cy - nailHeight / 2);
+                    ctx.lineTo(cx - nailWidth / 2, cy + nailHeight / 2);
+                    ctx.lineTo(cx + nailWidth / 2, cy + nailHeight / 2);
+                    ctx.lineTo(cx + nailWidth * 0.25, cy - nailHeight / 2);
+                    ctx.closePath();
+                },
+                stiletto: () => {
+                    ctx.moveTo(cx, cy - nailHeight / 2);
+                    ctx.lineTo(cx - nailWidth / 2, cy + nailHeight / 2);
+                    ctx.lineTo(cx + nailWidth / 2, cy + nailHeight / 2);
+                    ctx.closePath();
+                },
+                oval: () => {
+                    ctx.ellipse(cx, cy, nailWidth / 2, nailHeight / 2, 0, 0, 2 * Math.PI);
+                }
+            };
+            
+            if (shapes[shape]) {
+                shapes[shape]();
+            }
+            ctx.fill();
+            
+            // Apply a simple pattern
+            ctx.clip(); // Restrict drawing to the nail shape
+            switch (pattern) {
+                case 'leopard':
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+                    for (let i = 0; i < 50; i++) {
+                        const x = cx + Math.random() * nailWidth - nailWidth / 2;
+                        const y = cy + Math.random() * nailHeight - nailHeight / 2;
+                        ctx.beginPath();
+                        ctx.arc(x, y, 5, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    break;
+                case 'zebra':
+                    ctx.fillStyle = 'black';
+                    for (let i = -10; i < 10; i++) {
+                        ctx.beginPath();
+                        ctx.moveTo(cx - 200, cy + i * 20);
+                        ctx.lineTo(cx + 200, cy + i * 20 + 20);
+                        ctx.lineWidth = 10;
+                        ctx.strokeStyle = 'black';
+                        ctx.stroke();
+                    }
+                    break;
+                case 'tiger':
+                    ctx.fillStyle = 'black';
+                    for (let i = -10; i < 10; i++) {
+                        ctx.beginPath();
+                        ctx.moveTo(cx - 200, cy + i * 20);
+                        ctx.lineTo(cx + 200, cy + i * 20 + 20);
+                        ctx.lineWidth = 8;
+                        ctx.strokeStyle = 'black';
+                        ctx.stroke();
+                    }
+                    break;
+                case 'cow':
+                    ctx.fillStyle = 'black';
+                    for (let i = 0; i < 8; i++) {
+                        ctx.beginPath();
+                        ctx.arc(cx + (Math.random() - 0.5) * nailWidth, cy + (Math.random() - 0.5) * nailHeight, 20 + Math.random() * 20, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    break;
+                case 'stripes':
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                    for (let i = -10; i < 10; i++) {
+                        ctx.beginPath();
+                        ctx.moveTo(cx - 200, cy + i * 20);
+                        ctx.lineTo(cx + 200, cy + i * 20);
+                        ctx.lineWidth = 10;
+                        ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+                        ctx.stroke();
+                    }
+                    break;
+                case 'dots':
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                    for (let i = -100; i < 100; i += 20) {
+                        for (let j = -100; j < 100; j += 20) {
+                            ctx.beginPath();
+                            ctx.arc(cx + i, cy + j, 5, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                    }
+                    break;
+                case 'checkerboard':
+                    const squareSize = 25;
+                    for (let y = cy - nailHeight/2; y < cy + nailHeight/2; y += squareSize) {
+                        for (let x = cx - nailWidth/2; x < cx + nailWidth/2; x += squareSize) {
+                            if ((Math.floor(x/squareSize) + Math.floor(y/squareSize)) % 2 === 0) {
+                                ctx.fillStyle = 'white';
+                                ctx.fillRect(x, y, squareSize, squareSize);
+                            } else {
+                                ctx.fillStyle = 'rgba(0,0,0,0.2)';
+                                ctx.fillRect(x, y, squareSize, squareSize);
+                            }
+                        }
+                    }
+                    break;
+                case 'honeycomb':
+                     const hexSize = 20;
+                     const sideLength = hexSize / (2 * Math.cos(Math.PI / 6));
+                     const height = 2 * sideLength * Math.sin(Math.PI / 3);
+                     ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+                     for (let x = cx - nailWidth/2 - 10; x < cx + nailWidth/2 + 10; x += hexSize * 1.5) {
+                        for (let y = cy - nailHeight/2 - 10; y < cy + nailHeight/2 + 10; y += height) {
+                            for (let i = 0; i < 2; i++) {
+                                const startX = x + (i * hexSize * 0.75);
+                                const startY = y + (i * height / 2);
+                                ctx.beginPath();
+                                for (let j = 0; j < 6; j++) {
+                                    const angle = j * Math.PI / 3;
+                                    const currentX = startX + sideLength * Math.cos(angle);
+                                    const currentY = startY + sideLength * Math.sin(angle);
+                                    if (j === 0) {
+                                        ctx.moveTo(currentX, currentY);
+                                    } else {
+                                        ctx.lineTo(currentX, currentY);
+                                    }
+                                }
+                                ctx.closePath();
+                                ctx.stroke();
+                            }
+                        }
+                     }
+                     break;
+                case 'leaves':
+                    ctx.fillStyle = 'rgba(0, 100, 0, 0.5)';
+                    for (let i = 0; i < 20; i++) {
+                        const x = cx + (Math.random() - 0.5) * nailWidth;
+                        const y = cy + (Math.random() - 0.5) * nailHeight;
+                        ctx.save();
+                        ctx.translate(x, y);
+                        ctx.rotate(Math.random() * Math.PI * 2);
+                        ctx.beginPath();
+                        ctx.ellipse(0, 0, 10, 20, 0, 0, 2 * Math.PI);
+                        ctx.fill();
+                        ctx.restore();
+                    }
+                    break;
+                case 'waves':
+                    ctx.fillStyle = 'rgba(0, 0, 255, 0.3)';
+                    for (let i = 0; i < 5; i++) {
+                        ctx.beginPath();
+                        ctx.moveTo(cx - nailWidth / 2, cy - nailHeight / 2 + i * 50);
+                        ctx.bezierCurveTo(cx - nailWidth / 4, cy - nailHeight / 2 + i * 50 + 20, cx + nailWidth / 4, cy - nailHeight / 2 + i * 50 - 20, cx + nailWidth / 2, cy - nailHeight / 2 + i * 50);
+                        ctx.lineTo(cx + nailWidth / 2, cy + nailHeight / 2);
+                        ctx.lineTo(cx - nailWidth / 2, cy + nailHeight / 2);
+                        ctx.closePath();
+                        ctx.fill();
+                    }
+                    break;
+                case 'clouds':
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                    for (let i = 0; i < 5; i++) {
+                        const x = cx + (Math.random() - 0.5) * nailWidth;
+                        const y = cy - nailHeight / 2 + Math.random() * 50;
+                        ctx.beginPath();
+                        ctx.arc(x, y, 20, 0, Math.PI * 2);
+                        ctx.arc(x + 15, y + 10, 25, 0, Math.PI * 2);
+                        ctx.arc(x - 15, y + 5, 18, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    break;
+                case 'fruit':
+                    const fruits = ['🍓', '🍋', '🍉'];
+                    for (let i = 0; i < 5; i++) {
+                        const x = cx + (Math.random() - 0.5) * nailWidth;
+                        const y = cy + (Math.random() - 0.5) * nailHeight;
+                        ctx.font = '30px serif';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(fruits[Math.floor(Math.random() * fruits.length)], x, y);
+                    }
+                    break;
+                case 'donut':
+                    ctx.fillStyle = 'rgba(255, 192, 203, 0.7)';
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, 50, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = color;
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, 20, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+                case 'snowflake':
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                    for (let i = 0; i < 10; i++) {
+                        const x = cx + (Math.random() - 0.5) * nailWidth;
+                        const y = cy + (Math.random() - 0.5) * nailHeight;
+                        ctx.font = '20px serif';
+                        ctx.textAlign = 'center';
+                        ctx.fillText('❅', x, y);
+                    }
+                    break;
+                case 'pumpkin':
+                    ctx.fillStyle = 'orange';
+                    for (let i = 0; i < 5; i++) {
+                        const x = cx + (Math.random() - 0.5) * nailWidth;
+                        const y = cy + (Math.random() - 0.5) * nailHeight;
+                        ctx.beginPath();
+                        ctx.arc(x, y, 15, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    break;
+                case 'tie-dye':
+                    const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, nailHeight);
+                    gradient.addColorStop(0, 'rgba(255,0,0,0.5)');
+                    gradient.addColorStop(0.2, 'rgba(255,255,0,0.5)');
+                    gradient.addColorStop(0.4, 'rgba(0,255,0,0.5)');
+                    gradient.addColorStop(0.6, 'rgba(0,0,255,0.5)');
+                    gradient.addColorStop(0.8, 'rgba(75,0,130,0.5)');
+                    gradient.addColorStop(1, 'rgba(238,130,238,0.5)');
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(cx - nailWidth / 2, cy - nailHeight / 2, nailWidth, nailHeight);
+                    break;
+                case 'marbling':
+                    ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+                    ctx.lineWidth = 2;
+                    for (let i = 0; i < 15; i++) {
+                        ctx.beginPath();
+                        ctx.moveTo(cx + (Math.random() - 0.5) * nailWidth, cy - nailHeight / 2);
+                        ctx.lineTo(cx + (Math.random() - 0.5) * nailWidth, cy + nailHeight / 2);
+                        ctx.stroke();
+                    }
+                    break;
+                case 'splatter':
+                    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+                    for (let i = 0; i < 50; i++) {
+                        const x = cx + (Math.random() - 0.5) * nailWidth;
+                        const y = cy + (Math.random() - 0.5) * nailHeight;
+                        ctx.beginPath();
+                        ctx.arc(x, y, 2 + Math.random() * 5, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    break;
+                case 'galaxy':
+                    const galaxyGradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, nailHeight);
+                    galaxyGradient.addColorStop(0, '#2b0c36');
+                    galaxyGradient.addColorStop(0.5, '#4a116b');
+                    galaxyGradient.addColorStop(1, '#0c002b');
+                    ctx.fillStyle = galaxyGradient;
+                    ctx.fillRect(cx - nailWidth / 2, cy - nailHeight / 2, nailWidth, nailHeight);
+                    ctx.fillStyle = 'rgba(255,255,255,0.8)';
+                    for (let i = 0; i < 100; i++) {
+                        const x = cx + (Math.random() - 0.5) * nailWidth;
+                        const y = cy + (Math.random() - 0.5) * nailHeight;
+                        ctx.beginPath();
+                        ctx.arc(x, y, 0.5 + Math.random() * 1.5, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    break;
+            }
+
+            // Apply the charm
+            if (charm === 'star') {
+                ctx.font = '72px serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('⭐', cx, cy);
+            } else if (charm === 'heart') {
+                ctx.font = '72px serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('❤️', cx, cy);
+            } else if (charm === 'diamond') {
+                ctx.font = '72px serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('💎', cx, cy);
+            } else if (charm === 'moon') {
+                 ctx.font = '72px serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('🌙', cx, cy);
+            }
+
+            ctx.restore();
+        }
+
+        /**
+         * Main function to re-draw the nail based on the current design state.
+         */
+        function redraw() {
+            drawNail(currentDesign.shape, currentDesign.color, currentDesign.pattern, currentDesign.charm);
+        }
+
+        /**
+         * Displays a temporary message box for events like saving or liking.
+         * @param {string} message - The message to display.
+         */
+        function showMessage(message) {
+            messageBox.textContent = message;
+            messageBox.classList.remove('hidden');
+            messageBox.classList.add('visible');
+            setTimeout(() => {
+                messageBox.classList.remove('visible');
+                messageBox.classList.add('hidden');
+            }, 2000);
+        }
+
+        /**
+         * Shows a custom confirmation dialog.
+         * @param {string} message - The message to display in the dialog.
+         * @returns {Promise<boolean>} A promise that resolves to true if 'Yes' is clicked, false otherwise.
+         */
+        function showConfirmation(message) {
+            return new Promise(resolve => {
+                confirmationDialog.classList.remove('hidden');
+                confirmMessage.textContent = message;
+                
+                const onYes = () => {
+                    confirmationDialog.classList.add('hidden');
+                    confirmYesBtn.removeEventListener('click', onYes);
+                    confirmNoBtn.removeEventListener('click', onNo);
+                    resolve(true);
+                };
+
+                const onNo = () => {
+                    confirmationDialog.classList.add('hidden');
+                    confirmYesBtn.removeEventListener('click', onYes);
+                    confirmNoBtn.removeEventListener('click', onNo);
+                    resolve(false);
+                };
+
+                confirmYesBtn.addEventListener('click', onYes);
+                confirmNoBtn.addEventListener('click', onNo);
+            });
+        }
+
+        // --- Event Listeners and UI Logic ---
+
+        // Handle window resize to make the canvas responsive
+        function resizeCanvas() {
+            const container = document.querySelector('.canvas-container');
+            canvas.width = container.offsetWidth;
+            canvas.height = container.offsetHeight > 500 ? 500 : container.offsetHeight;
+            redraw();
+        }
+        window.addEventListener('resize', resizeCanvas);
+        window.onload = () => {
+            resizeCanvas();
+            renderSavedDesigns();
+        };
+
+        // Update color
+        polishColorInput.addEventListener('input', (e) => {
+            currentDesign.color = e.target.value;
+            redraw();
+        });
+
+        // Update shape
+        shapeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                currentDesign.shape = btn.dataset.shape;
+                // Add active state styling
+                shapeButtons.forEach(b => b.classList.remove('bg-pink-200', 'border-pink-500'));
+                btn.classList.add('bg-pink-200', 'border-pink-500');
+                redraw();
+            });
+        });
+
+        // Update pattern
+        patternButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                currentDesign.pattern = btn.dataset.pattern;
+                patternButtons.forEach(b => b.classList.remove('bg-pink-200', 'border-pink-500'));
+                btn.classList.add('bg-pink-200', 'border-pink-500');
+                redraw();
+            });
+        });
+
+        // Update charm
+        charmButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                currentDesign.charm = btn.dataset.charm;
+                charmButtons.forEach(b => b.classList.remove('bg-pink-200', 'border-pink-500'));
+                btn.classList.add('bg-pink-200', 'border-pink-500');
+                redraw();
+            });
+        });
+
+        // Save a design to local storage
+        saveBtn.addEventListener('click', () => {
+            let savedDesigns = JSON.parse(localStorage.getItem('nailDesigns') || '[]');
+            savedDesigns.push(currentDesign);
+            localStorage.setItem('nailDesigns', JSON.stringify(savedDesigns));
+            showMessage('Design Saved!');
+            renderSavedDesigns();
+        });
+
+        // Clear all saved designs
+        clearBtn.addEventListener('click', async () => {
+            const confirmed = await showConfirmation("Are you sure you want to clear all designs?");
+            if (confirmed) {
+                localStorage.removeItem('nailDesigns');
+                showMessage('Designs Cleared!');
+                renderSavedDesigns();
+            }
+        });
+
+        // Simulate "liking" a design
+        likeBtn.addEventListener('click', () => {
+            showMessage('👍 You got a new like!');
+        });
+
+        /**
+         * Renders the saved designs from local storage into the UI.
+         */
+        function renderSavedDesigns() {
+            const savedDesigns = JSON.parse(localStorage.getItem('nailDesigns') || '[]');
+            savedDesignsContainer.innerHTML = ''; // Clear previous designs
+
+            if (savedDesigns.length === 0) {
+                noDesignsMessage.style.display = 'block';
+                return;
+            } else {
+                noDesignsMessage.style.display = 'none';
+            }
+
+            savedDesigns.forEach((design, index) => {
+                const card = document.createElement('div');
+                card.className = 'bg-pink-100 p-4 rounded-xl shadow-md border border-pink-200 flex flex-col gap-3';
+                card.innerHTML = `
+                    <h3 class="text-lg font-bold">Design #${index + 1}</h3>
+                    <div class="flex flex-col gap-1 text-sm text-slate-600">
+                        <span>Color: <span style="color:${design.color};">${design.color}</span></span>
+                        <span>Shape: ${design.shape}</span>
+                        <span>Pattern: ${design.pattern}</span>
+                        <span>Charm: ${design.charm}</span>
+                    </div>
+                    <button class="load-btn py-2 px-4 rounded-lg bg-orange-400 text-white font-semibold hover:bg-orange-500 transition-colors" data-index="${index}">Load</button>
+                    <button class="delete-btn py-2 px-4 rounded-lg bg-red-400 text-white font-semibold hover:bg-red-500 transition-colors" data-index="${index}">Delete</button>
+                `;
+                savedDesignsContainer.appendChild(card);
+            });
+
+            // Add event listeners for load and delete buttons
+            document.querySelectorAll('.load-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const index = btn.dataset.index;
+                    const designs = JSON.parse(localStorage.getItem('nailDesigns') || '[]');
+                    if (designs[index]) {
+                        currentDesign = designs[index];
+                        polishColorInput.value = currentDesign.color;
+                        redraw();
+                        // Update active state on buttons
+                        shapeButtons.forEach(b => b.classList.remove('bg-pink-200', 'border-pink-500'));
+                        document.querySelector(`.shape-btn[data-shape="${currentDesign.shape}"]`).classList.add('bg-pink-200', 'border-pink-500');
+                        patternButtons.forEach(b => b.classList.remove('bg-pink-200', 'border-pink-500'));
+                        document.querySelector(`.pattern-btn[data-pattern="${currentDesign.pattern}"]`).classList.add('bg-pink-200', 'border-pink-500');
+                        charmButtons.forEach(b => b.classList.remove('bg-pink-200', 'border-pink-500'));
+                        document.querySelector(`.charm-btn[data-charm="${currentDesign.charm}"]`).classList.add('bg-pink-200', 'border-pink-500');
+                        showMessage(`Design #${parseInt(index) + 1} Loaded!`);
+                    }
+                });
+            });
+
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const index = btn.dataset.index;
+                    const confirmed = await showConfirmation(`Are you sure you want to delete Design #${parseInt(index) + 1}?`);
+                    if (confirmed) {
+                        let designs = JSON.parse(localStorage.getItem('nailDesigns') || '[]');
+                        designs.splice(index, 1);
+                        localStorage.setItem('nailDesigns', JSON.stringify(designs));
+                        showMessage('Design Deleted!');
+                        renderSavedDesigns();
+                    }
+                });
+            });
+        }
+        
+        // Initial draw and render on page load
+        redraw();
+        renderSavedDesigns();
+    </script>
+</body>
+</html>
